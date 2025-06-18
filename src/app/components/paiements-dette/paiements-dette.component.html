@@ -1,0 +1,317 @@
+<div class="payments-container">
+  <div class="container">
+    <!-- En-tête dette -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card dette-header">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h3 class="mb-2" *ngIf="client && dette">
+                  <i class="fas fa-receipt me-2"></i>
+                  Paiements - Dette de {{ client.nom }}
+                </h3>
+                <div class="d-flex flex-wrap gap-3" *ngIf="dette">
+                  <span>
+                    <i class="fas fa-calendar me-1"></i>
+                    Dette du {{ dette.date | date:'dd/MM/yyyy' }}
+                  </span>
+                  <span>
+                    <i class="fas fa-money-bill-wave me-1"></i>
+                    Montant: {{ formatCurrency(dette.montantDette) }}
+                  </span>
+                  <span class="badge {{ getStatutClass() }} fs-6">
+                    {{ getStatutDette() }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="d-flex gap-2 justify-content-md-end">
+                  <button class="btn btn-light" (click)="retourDettes()">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Retour
+                  </button>
+                  <button 
+                    class="btn btn-success" 
+                    (click)="ajouterPaiement()"
+                    [disabled]="dette?.montantRestant === 0">
+                    <i class="fas fa-plus me-1"></i>
+                    Nouveau Paiement
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé de la dette -->
+    <div class="row mb-4" *ngIf="dette">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-4">
+              <i class="fas fa-chart-pie me-2"></i>
+              Résumé Financier
+            </h5>
+            
+            <div class="stats-grid">
+              <div class="card summary-card bg-primary text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                  <h4>{{ formatCurrency(dette.montantDette) }}</h4>
+                  <small>Montant Initial</small>
+                </div>
+              </div>
+              
+              <div class="card summary-card bg-success text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-check-circle fa-2x mb-2"></i>
+                  <h4>{{ formatCurrency(dette.montantPaye) }}</h4>
+                  <small>Montant Payé</small>
+                </div>
+              </div>
+              
+              <div class="card summary-card bg-warning text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                  <h4>{{ formatCurrency(dette.montantRestant) }}</h4>
+                  <small>Reste à Payer</small>
+                </div>
+              </div>
+              
+              <div class="card summary-card bg-info text-white">
+                <div class="card-body text-center">
+                  <i class="fas fa-list fa-2x mb-2"></i>
+                  <h4>{{ paiements.length }}</h4>
+                  <small>Nb. Paiements</small>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Barre de progression -->
+            <div class="mt-4">
+              <div class="d-flex justify-content-between mb-2">
+                <strong>Progression du paiement</strong>
+                <strong>{{ getPourcentagePaye() | number:'1.1-1' }}%</strong>
+              </div>
+              <div class="progress progress-custom">
+                <div 
+                  class="progress-bar bg-success" 
+                  [style.width.%]="getPourcentagePaye()">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique des paiements -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card payment-table">
+          <div class="card-header table-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+              <i class="fas fa-history me-2"></i>
+              Historique des Paiements
+            </h3>
+            <button class="btn btn-outline-light" (click)="recharger()" [disabled]="loading">
+              <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+              Actualiser
+            </button>
+          </div>
+          
+          <div class="card-body">
+            <!-- Loading -->
+            <div *ngIf="loading" class="text-center py-5">
+              <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Chargement...</span>
+              </div>
+              <p class="mt-3 text-muted">Chargement des paiements...</p>
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="error" class="alert alert-danger text-center">
+              <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+              <h5>{{ error }}</h5>
+              <button class="btn btn-outline-danger" (click)="recharger()">
+                <i class="fas fa-redo"></i> Réessayer
+              </button>
+            </div>
+
+            <!-- Aucun paiement -->
+            <div *ngIf="!loading && !error && paiements.length === 0" class="empty-state text-center">
+              <i class="fas fa-credit-card fa-4x text-muted mb-4"></i>
+              <h4 class="text-muted">Aucun paiement enregistré</h4>
+              <p class="text-muted mb-4">Cette dette n'a pas encore de paiements.</p>
+              <button 
+                class="btn btn-primary btn-lg" 
+                (click)="ajouterPaiement()"
+                *ngIf="dette?.montantRestant && dette.montantRestant > 0">
+                <i class="fas fa-plus me-2"></i>
+                Ajouter le premier paiement
+              </button>
+            </div>
+
+            <!-- Liste des paiements -->
+            <div *ngIf="!loading && !error && paiements.length > 0">
+              <!-- Statistiques rapides -->
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="card bg-success text-white">
+                    <div class="card-body text-center py-3">
+                      <h5 class="mb-0">{{ formatCurrency(getTotalPaiements()) }}</h5>
+                      <small>Total des paiements</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card bg-info text-white">
+                    <div class="card-body text-center py-3">
+                      <h5 class="mb-0">{{ formatCurrency(getTotalPaiements() / paiements.length) }}</h5>
+                      <small>Paiement moyen</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vue tableau pour écrans larges -->
+              <div class="table-responsive d-none d-md-block">
+                <table class="table table-hover">
+                  <thead class="table-header">
+                    <tr>
+                      <th><i class="fas fa-calendar me-1"></i> Date</th>
+                      <th><i class="fas fa-money-bill-wave me-1"></i> Montant</th>
+                      <th><i class="fas fa-chart-line me-1"></i> Cumul</th>
+                      <th><i class="fas fa-percentage me-1"></i> % Dette</th>
+                      <th><i class="fas fa-clock me-1"></i> Il y a</th>
+                      <th><i class="fas fa-cogs me-1"></i> Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let paiement of paiements; let i = index" class="align-middle">
+                      <td>
+                        <strong>{{ paiement.date | date:'dd/MM/yyyy' }}</strong>
+                        <br>
+                        <small class="text-muted">{{ paiement.date | date:'EEEE' }}</small>
+                      </td>
+                      <td>
+                        <span class="badge bg-success fs-6">
+                          {{ formatCurrency(paiement.montant) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="text-info fw-bold">
+                          {{ formatCurrency(getCumulPaiements(i)) }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="progress progress-mini me-2">
+                            <div 
+                              class="progress-bar bg-info" 
+                              [style.width.%]="getPourcentagePaiement(paiement)">
+                            </div>
+                          </div>
+                          <small>{{ getPourcentagePaiement(paiement) | number:'1.1-1' }}%</small>
+                        </div>
+                      </td>
+                      <td>
+                        <small class="text-muted">{{ getDateDifference(paiement.date) }} jour(s)</small>
+                      </td>
+                      <td>
+                        <button 
+                          class="btn btn-outline-danger btn-sm btn-action"
+                          (click)="supprimerPaiement(paiement)"
+                          title="Supprimer ce paiement">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot class="table-light">
+                    <tr class="fw-bold">
+                      <td>TOTAL</td>
+                      <td>
+                        <span class="badge bg-primary fs-6">
+                          {{ formatCurrency(getTotalPaiements()) }}
+                        </span>
+                      </td>
+                      <td colspan="4">
+                        <div class="progress progress-custom">
+                          <div 
+                            class="progress-bar bg-success" 
+                            [style.width.%]="getPourcentagePaye()">
+                            <small class="text-white fw-bold">{{ getPourcentagePaye() | number:'1.1-1' }}%</small>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- Vue timeline pour écrans mobiles -->
+              <div class="d-md-none">
+                <div class="payment-timeline">
+                  <div class="timeline-item" *ngFor="let paiement of paiements; let i = index">
+                    <div class="card payment-card">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <h6 class="mb-1">{{ formatCurrency(paiement.montant) }}</h6>
+                            <small class="text-muted">{{ paiement.date | date:'dd/MM/yyyy' }}</small>
+                          </div>
+                          <div class="text-end">
+                            <span class="badge bg-info">{{ getPourcentagePaiement(paiement) | number:'1.1-1' }}%</span>
+                            <br>
+                            <button 
+                              class="btn btn-outline-danger btn-sm mt-1"
+                              (click)="supprimerPaiement(paiement)">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="progress progress-custom">
+                          <div 
+                            class="progress-bar bg-success" 
+                            [style.width.%]="getPourcentagePaiement(paiement)">
+                          </div>
+                        </div>
+                        <small class="text-muted">
+                          Cumul: {{ formatCurrency(getCumulPaiements(i)) }} - 
+                          Il y a {{ getDateDifference(paiement.date) }} jour(s)
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message dette soldée -->
+              <div *ngIf="dette?.montantRestant === 0" class="alert alert-success mt-4 text-center">
+                <i class="fas fa-trophy fa-2x mb-3"></i>
+                <h4 class="text-success">🎉 Félicitations !</h4>
+                <p class="mb-0">Cette dette est entièrement soldée grâce à vos {{ paiements.length }} paiement(s).</p>
+              </div>
+
+              <!-- Bouton d'action si dette non soldée -->
+              <div *ngIf="dette?.montantRestant && dette.montantRestant > 0" class="text-center mt-4">
+                <div class="alert alert-warning">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Il reste encore <strong>{{ formatCurrency(dette.montantRestant) }}</strong> à payer sur cette dette.
+                </div>
+                <button class="btn btn-success btn-lg" (click)="ajouterPaiement()">
+                  <i class="fas fa-plus me-2"></i>
+                  Effectuer un nouveau paiement
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

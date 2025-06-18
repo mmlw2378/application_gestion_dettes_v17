@@ -1,0 +1,137 @@
+.payments-container {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.dette-header {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+  border-radius: 20px;
+  color: white;
+}
+
+.summary-card {
+  border-radius: 15px;
+  border: none;
+  transition: transform 0.3s;
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
+}
+
+.payment-card {
+  border-radius: 15px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.payment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.payment-table {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.table-header {
+  background: linear-gradient(135deg, #673ab7 0%, #512da8 100%);
+  color: white;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(156, 39, 176, 0.05);
+  transform: scale(1.01);
+  transition: all 0.2s;
+}
+
+.progress-custom {
+  height: 10px;
+  border-radius: 5px;
+  background-color: #e9ecef;
+}
+
+.progress-mini {
+  width: 60px;
+  height: 6px;
+}
+
+.btn-action {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn-action:hover {
+  transform: scale(1.1);
+}
+
+.empty-state {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 20px;
+  padding: 3rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.payment-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.payment-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #9c27b0, #e1bee7);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 0.5rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9c27b0;
+  border: 2px solid white;
+  box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.3);
+}
+
+@media (max-width: 768px) {
+  .payments-container {
+    padding: 1rem 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .btn-group-mobile {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

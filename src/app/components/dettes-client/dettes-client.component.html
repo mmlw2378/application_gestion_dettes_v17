@@ -1,0 +1,233 @@
+<div class="container py-4">
+  <!-- En-tête client -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card client-header">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <div class="d-flex align-items-center">
+                <div class="client-avatar me-3">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h3 class="mb-1" *ngIf="client">
+                    <i class="fas fa-user-circle me-2"></i>
+                    {{ client.nom }}
+                  </h3>
+                  <div class="d-flex flex-wrap gap-3" *ngIf="client">
+                    <span>
+                      <i class="fas fa-phone me-1"></i>
+                      {{ client.telephone }}
+                    </span>
+                    <span>
+                      <i class="fas fa-map-marker-alt me-1"></i>
+                      {{ client.adresse }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <div class="d-flex gap-2 justify-content-md-end">
+                <button class="btn btn-light" (click)="retourClients()">
+                  <i class="fas fa-arrow-left me-1"></i>
+                  Retour
+                </button>
+                <button class="btn btn-success" (click)="ajouterDette()">
+                  <i class="fas fa-plus me-1"></i>
+                  Nouvelle Dette
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="row mb-4" *ngIf="!loading && dettes.length > 0">
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-info text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-list fa-2x mb-2"></i>
+          <h4>{{ totalDettes }}</h4>
+          <small>Total Dettes</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-primary text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+          <h5>{{ formatCurrency(totalMontantDettes) }}</h5>
+          <small>Montant Total</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-success text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-check-circle fa-2x mb-2"></i>
+          <h5>{{ formatCurrency(totalMontantPaye) }}</h5>
+          <small>Montant Payé</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-warning text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+          <h5>{{ formatCurrency(totalMontantRestant) }}</h5>
+          <small>Reste à Payer</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-danger text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-times-circle fa-2x mb-2"></i>
+          <h4>{{ dettesNonPayees }}</h4>
+          <small>Non Payées</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+      <div class="card stat-card bg-success text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-check-double fa-2x mb-2"></i>
+          <h4>{{ dettesSoldees }}</h4>
+          <small>Soldées</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des dettes -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">
+            <i class="fas fa-receipt me-2"></i>
+            Dettes du Client
+          </h3>
+          <button class="btn btn-outline-primary" (click)="recharger()" [disabled]="loading">
+            <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+            Actualiser
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-3 text-muted">Chargement des dettes...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="error" class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+            <h5>{{ error }}</h5>
+            <button class="btn btn-outline-danger" (click)="recharger()">
+              <i class="fas fa-redo"></i> Réessayer
+            </button>
+          </div>
+
+          <!-- Aucune dette -->
+          <div *ngIf="!loading && !error && dettes.length === 0" class="empty-state text-center">
+            <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">Aucune dette trouvée</h4>
+            <p class="text-muted mb-4">Ce client n'a pas encore de dettes enregistrées.</p>
+            <button class="btn btn-primary btn-lg" (click)="ajouterDette()">
+              <i class="fas fa-plus me-2"></i>
+              Ajouter la première dette
+            </button>
+          </div>
+
+          <!-- Liste des dettes -->
+          <div *ngIf="!loading && !error && dettes.length > 0">
+            <div class="row">
+              <div class="col-12 mb-3" *ngFor="let dette of dettes; let i = index">
+                <div class="card dette-card">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <!-- Info dette -->
+                      <div class="col-md-3">
+                        <h6 class="mb-2">
+                          <i class="fas fa-calendar-alt text-primary me-2"></i>
+                          {{ dette.date | date:'dd/MM/yyyy' }}
+                        </h6>
+                        <span class="badge badge-status {{ getStatutClass(dette) }}">
+                          {{ getStatutDette(dette) }}
+                        </span>
+                      </div>
+
+                      <!-- Montants -->
+                      <div class="col-md-5">
+                        <div class="row text-center">
+                          <div class="col-4">
+                            <small class="text-muted d-block">Dette</small>
+                            <strong class="text-primary">{{ formatCurrency(dette.montantDette) }}</strong>
+                          </div>
+                          <div class="col-4">
+                            <small class="text-muted d-block">Payé</small>
+                            <strong class="text-success">{{ formatCurrency(dette.montantPaye) }}</strong>
+                          </div>
+                          <div class="col-4">
+                            <small class="text-muted d-block">Restant</small>
+                            <strong class="text-warning">{{ formatCurrency(dette.montantRestant) }}</strong>
+                          </div>
+                        </div>
+                        
+                        <!-- Barre de progression -->
+                        <div class="progress progress-custom mt-3">
+                          <div 
+                            class="progress-bar bg-success" 
+                            [style.width.%]="getPourcentagePaye(dette)">
+                          </div>
+                        </div>
+                        <small class="text-muted">
+                          {{ getPourcentagePaye(dette) | number:'1.1-1' }}% payé
+                        </small>
+                      </div>
+
+                      <!-- Actions -->
+                      <div class="col-md-4">
+                        <div class="d-flex gap-2 justify-content-end btn-group-mobile">
+                          <button 
+                            class="btn btn-outline-info btn-sm btn-action"
+                            (click)="voirPaiements(dette.id!)"
+                            title="Voir l'historique des paiements">
+                            <i class="fas fa-history me-1"></i>
+                            Paiements
+                          </button>
+                          <button 
+                            class="btn btn-outline-success btn-sm btn-action"
+                            (click)="ajouterPaiement(dette.id!)"
+                            [disabled]="dette.montantRestant <= 0"
+                            title="Ajouter un nouveau paiement">
+                            <i class="fas fa-plus me-1"></i>
+                            Payer
+                          </button>
+                        </div>
+                        <div class="text-end mt-2" *ngIf="dette.montantRestant <= 0">
+                          <small class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Dette soldée
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

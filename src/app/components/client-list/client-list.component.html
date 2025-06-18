@@ -1,0 +1,146 @@
+<!-- src/app/components/client-list/client-list.component.html -->
+<div class="container py-4">
+  <!-- En-tête -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card stats-card">
+        <div class="card-body text-center">
+          <h2 class="mb-3">
+            <i class="fas fa-users me-2"></i>
+            Gestion des Clients
+          </h2>
+          <p class="mb-0">Gérez vos clients et leurs dettes en toute simplicité</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="row mb-4" *ngIf="!loading && !error">
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-users fa-2x mb-2"></i>
+          <h4>{{ clients.length }}</h4>
+          <small>Total Clients</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-chart-line fa-2x mb-2"></i>
+          <h4>Actif</h4>
+          <small>Système en ligne</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-warning text-white">
+        <div class="card-body text-center">
+          <i class="fas fa-clock fa-2x mb-2"></i>
+          <h4>{{ getCurrentTime() }}</h4>
+          <small>Dernière mise à jour</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">
+            <i class="fas fa-address-book me-2"></i>
+            Liste des Clients
+          </h3>
+          <button class="btn btn-success" (click)="recharger()" [disabled]="loading">
+            <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i> 
+            {{ loading ? 'Chargement...' : 'Actualiser' }}
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary loading-spinner" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-3 text-muted">Chargement des clients...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="error" class="alert error-container">
+            <div class="text-center py-3">
+              <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+              <h5 class="text-danger">{{ error }}</h5>
+              <button class="btn btn-outline-danger" (click)="recharger()">
+                <i class="fas fa-redo"></i> Réessayer
+              </button>
+            </div>
+          </div>
+
+          <!-- Aucun client -->
+          <div *ngIf="!loading && !error && clients.length === 0" class="text-center py-5">
+            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucun client trouvé</h5>
+            <p class="text-muted">Commencez par ajouter des clients dans la base de données.</p>
+          </div>
+
+          <!-- Liste des clients -->
+          <div *ngIf="!loading && !error && clients.length > 0">
+            <div class="row">
+              <div class="col-lg-4 col-md-6 mb-4" *ngFor="let client of clients; let i = index">
+                <div class="card client-card h-100">
+                  <div class="card-body text-center">
+                    <!-- Icône client -->
+                    <div class="client-icon mx-auto">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    
+                    <!-- Informations client -->
+                    <h5 class="card-title text-primary fw-bold">{{ client.nom }}</h5>
+                    
+                    <div class="client-info mb-3">
+                      <p class="card-text mb-1">
+                        <i class="fas fa-phone text-success me-2"></i>
+                        <strong>{{ client.telephone }}</strong>
+                      </p>
+                      <p class="card-text text-muted">
+                        <i class="fas fa-map-marker-alt text-warning me-2"></i>
+                        {{ client.adresse }}
+                      </p>
+                    </div>
+                    
+                    <!-- Badge numéro client -->
+                    <span class="badge bg-secondary mb-3">Client #{{ client.id }}</span>
+                  </div>
+                  
+                  <!-- Actions -->
+                  <div class="card-footer bg-transparent border-0">
+                    <div class="d-grid gap-2 btn-group-custom">
+                      <button 
+                        class="btn btn-outline-success"
+                        (click)="voirDettes(client.id!)"
+                        title="Voir les dettes de {{ client.nom }}">
+                        <i class="fas fa-list-alt me-2"></i>
+                        Voir les Dettes
+                      </button>
+                      <button 
+                        class="btn btn-outline-primary"
+                        (click)="ajouterDette(client.id!)"
+                        title="Ajouter une nouvelle dette pour {{ client.nom }}">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Nouvelle Dette
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

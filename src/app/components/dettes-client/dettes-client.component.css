@@ -1,0 +1,82 @@
+.client-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border-radius: 15px;
+  color: white;
+}
+
+.stat-card {
+  border-radius: 15px;
+  border: none;
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.dette-card {
+  border-radius: 15px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dette-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.progress-custom {
+  height: 8px;
+  border-radius: 10px;
+}
+
+.btn-action {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-action:hover {
+  transform: scale(1.05);
+}
+
+.badge-status {
+  font-size: 0.75em;
+  padding: 0.5em 0.75em;
+  border-radius: 50px;
+}
+
+.client-avatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #007bff;
+  font-size: 1.5rem;
+  border: 3px solid rgba(255,255,255,0.3);
+}
+
+.empty-state {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  padding: 3rem;
+}
+
+@media (max-width: 768px) {
+  .stat-card .card-body {
+    padding: 1rem;
+  }
+  
+  .dette-card .card-body {
+    padding: 1rem;
+  }
+  
+  .btn-group-mobile {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

@@ -1,0 +1,262 @@
+<div class="payment-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card payment-card">
+          <!-- En-tête -->
+          <div class="payment-header text-center">
+            <h2 class="mb-3">
+              <i class="fas fa-credit-card me-3"></i>
+              Nouveau Paiement
+            </h2>
+            <p class="mb-0" *ngIf="client && dette">
+              Paiement pour <strong>{{ client.nom }}</strong> - Dette du {{ dette.date | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+
+          <div class="card-body p-4">
+            <!-- Informations de la dette -->
+            <div class="dette-info mb-4" *ngIf="dette && client">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
+                Détails de la Dette
+              </h5>
+              
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <strong>Client:</strong><br>
+                  <span class="text-primary">{{ client.nom }}</span>
+                </div>
+                <div class="col-md-3">
+                  <strong>Date dette:</strong><br>
+                  <span class="text-info">{{ dette.date | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="col-md-3">
+                  <strong>Montant initial:</strong><br>
+                  <span class="text-secondary">{{ formatCurrency(dette.montantDette) }}</span>
+                </div>
+                <div class="col-md-3">
+                  <strong>Déjà payé:</strong><br>
+                  <span class="text-success">{{ formatCurrency(dette.montantPaye) }}</span>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong>Reste à payer:</strong><br>
+                  <span class="text-warning h5">{{ formatCurrency(dette.montantRestant) }}</span>
+                </div>
+                <div class="col-md-6">
+                  <strong>Statut:</strong><br>
+                  <span class="badge bg-warning" *ngIf="dette.montantRestant > 0">En cours</span>
+                  <span class="badge bg-success" *ngIf="dette.montantRestant === 0">Soldée</span>
+                </div>
+              </div>
+              
+              <!-- Barre de progression actuelle -->
+              <div class="mb-2">
+                <small class="text-muted">Progression actuelle:</small>
+              </div>
+              <div class="progress progress-custom">
+                <div 
+                  class="progress-bar bg-success" 
+                  [style.width.%]="getPourcentageActuel()">
+                  <small class="text-white fw-bold">{{ getPourcentageActuel() | number:'1.1-1' }}%</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages d'état -->
+            <div *ngIf="error" class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ error }}
+            </div>
+            
+            <div *ngIf="success" class="alert alert-success mb-4 success-animation">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong>Succès!</strong> Paiement enregistré avec succès. Redirection en cours...
+            </div>
+
+            <!-- Formulaire -->
+            <form [formGroup]="paiementForm" (ngSubmit)="onSubmit()" *ngIf="!success && dette && dette.montantRestant > 0">
+              <div class="row">
+                <!-- Date du paiement -->
+                <div class="col-md-6 mb-4">
+                  <label for="date" class="form-label">
+                    <i class="fas fa-calendar text-primary me-2"></i>
+                    Date du paiement *
+                  </label>
+                  <input 
+                    type="date" 
+                    id="date"
+                    class="form-control"
+                    formControlName="date"
+                    [class.is-valid]="date?.valid && date?.touched"
+                    [class.is-invalid]="date?.invalid && date?.touched">
+                  
+                  <div class="invalid-feedback" *ngIf="date?.invalid && date?.touched">
+                    <div *ngIf="date?.errors?.['required']">
+                      La date est obligatoire
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Montant du paiement -->
+                <div class="col-md-6 mb-4">
+                  <label for="montant" class="form-label">
+                    <i class="fas fa-money-bill-wave text-success me-2"></i>
+                    Montant du paiement (CFA) *
+                  </label>
+                  <input 
+                    type="number" 
+                    id="montant"
+                    class="form-control"
+                    formControlName="montant"
+                    [placeholder]="'Maximum: ' + formatCurrency(dette.montantRestant)"
+                    min="1"
+                    [max]="dette.montantRestant"
+                    [class.is-valid]="montant?.valid && montant?.touched"
+                    [class.is-invalid]="montant?.invalid && montant?.touched">
+                  
+                  <div class="invalid-feedback" *ngIf="montant?.invalid && montant?.touched">
+                    <div *ngIf="montant?.errors?.['required']">
+                      Le montant est obligatoire
+                    </div>
+                    <div *ngIf="montant?.errors?.['min']">
+                      Le montant doit être supérieur à 0
+                    </div>
+                    <div *ngIf="montant?.errors?.['max']">
+                      Le montant ne peut pas dépasser {{ formatCurrency(dette.montantRestant) }}
+                    </div>
+                    <div *ngIf="montant?.errors?.['pattern']">
+                      Veuillez saisir un montant valide (chiffres uniquement)
+                    </div>
+                  </div>
+                  
+                  <small class="form-text text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Montant maximum: {{ formatCurrency(dette.montantRestant) }}
+                  </small>
+                </div>
+              </div>
+
+              <!-- Description (optionnelle) -->
+              <div class="mb-4">
+                <label for="description" class="form-label">
+                  <i class="fas fa-comment text-info me-2"></i>
+                  Description du paiement (optionnelle)
+                </label>
+                <textarea 
+                  id="description"
+                  class="form-control"
+                  formControlName="description"
+                  rows="2"
+                  placeholder="Motif du paiement, mode de paiement..."
+                  maxlength="300">
+                </textarea>
+                
+                <small class="form-text text-muted">
+                  {{ description?.value?.length || 0 }}/300 caractères
+                </small>
+              </div>
+
+              <!-- Simulation du paiement -->
+              <div class="simulation-card p-4 mb-4" *ngIf="paiementForm.valid && dette">
+                <h5 class="text-success mb-3">
+                  <i class="fas fa-calculator me-2"></i>
+                  Simulation du Paiement
+                </h5>
+                
+                <div class="row mb-3">
+                  <div class="col-md-4">
+                    <strong>Montant du paiement:</strong><br>
+                    <span class="text-success h6">{{ formatCurrency(montant?.value) }}</span>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Nouveau montant payé:</strong><br>
+                    <span class="text-primary h6">{{ formatCurrency(dette.montantPaye + montant?.value) }}</span>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Nouveau restant:</strong><br>
+                    <span class="text-warning h6">{{ formatCurrency(getNouveauRestant()) }}</span>
+                  </div>
+                </div>
+                
+                <!-- Nouvelle barre de progression -->
+                <div class="mb-2">
+                  <small class="text-success">Progression après paiement:</small>
+                </div>
+                <div class="progress progress-custom">
+                  <div 
+                    class="progress-bar bg-success" 
+                    [style.width.%]="getPourcentageApres()">
+                    <small class="text-white fw-bold">{{ getPourcentageApres() | number:'1.1-1' }}%</small>
+                  </div>
+                </div>
+                
+                <!-- Message dette soldée -->
+                <div class="text-center mt-3" *ngIf="isDetteSeraVSoldee()">
+                  <span class="soldee-badge">
+                    <i class="fas fa-trophy me-2"></i>
+                    DETTE SOLDÉE APRÈS CE PAIEMENT!
+                  </span>
+                </div>
+              </div>
+
+              <!-- Boutons d'action -->
+              <div class="d-flex gap-3 justify-content-end btn-group-mobile">
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-payment" 
+                  (click)="annuler()"
+                  [disabled]="loading">
+                  <i class="fas fa-times me-2"></i>
+                  Annuler
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-payment"
+                  [disabled]="paiementForm.invalid || loading">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!loading" class="fas fa-credit-card me-2"></i>
+                  {{ loading ? 'Traitement...' : 'Enregistrer le paiement' }}
+                </button>
+              </div>
+            </form>
+
+            <!-- Dette déjà soldée -->
+            <div *ngIf="dette && dette.montantRestant === 0" class="text-center py-5">
+              <div class="success-animation">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h4 class="text-success">Cette dette est déjà soldée</h4>
+                <p class="text-muted">Tous les paiements ont été effectués.</p>
+                <button class="btn btn-primary btn-payment" (click)="annuler()">
+                  <i class="fas fa-arrow-left me-2"></i>
+                  Retour aux dettes
+                </button>
+              </div>
+            </div>
+
+            <!-- Message de succès final -->
+            <div *ngIf="success" class="text-center py-4">
+              <div class="success-animation">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h4 class="text-success">Paiement enregistré avec succès!</h4>
+                <p class="text-muted">Mise à jour de la dette en cours...</p>
+                <div class="spinner-border text-success mt-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="card-footer bg-light text-center">
+            <small class="text-muted">
+              <i class="fas fa-shield-alt me-1"></i>
+              Toutes les transactions sont sécurisées et tracées
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

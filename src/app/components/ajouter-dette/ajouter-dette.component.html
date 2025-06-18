@@ -1,0 +1,217 @@
+<div class="form-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card form-card">
+          <!-- En-tête -->
+          <div class="form-header text-center">
+            <h2 class="mb-3">
+              <i class="fas fa-plus-circle me-3"></i>
+              Nouvelle Dette
+            </h2>
+            <p class="mb-0" *ngIf="client">
+              Ajouter une dette pour <strong>{{ client.nom }}</strong>
+            </p>
+          </div>
+
+          <div class="card-body p-4">
+            <!-- Informations client -->
+            <div class="client-info p-3 mb-4" *ngIf="client">
+              <h5 class="text-primary mb-3">
+                <i class="fas fa-user me-2"></i>
+                Informations du Client
+              </h5>
+              <div class="row">
+                <div class="col-md-4">
+                  <strong>Nom:</strong><br>
+                  <span class="text-primary">{{ client.nom }}</span>
+                </div>
+                <div class="col-md-4">
+                  <strong>Téléphone:</strong><br>
+                  <span class="text-success">{{ client.telephone }}</span>
+                </div>
+                <div class="col-md-4">
+                  <strong>Adresse:</strong><br>
+                  <span class="text-info">{{ client.adresse }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages d'état -->
+            <div *ngIf="error" class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ error }}
+            </div>
+            
+            <div *ngIf="success" class="alert alert-success mb-4 success-animation">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong>Succès!</strong> Dette ajoutée avec succès. Redirection en cours...
+            </div>
+
+            <!-- Formulaire -->
+            <form [formGroup]="detteForm" (ngSubmit)="onSubmit()" *ngIf="!success">
+              <div class="row">
+                <!-- Date de la dette -->
+                <div class="col-md-6 mb-4">
+                  <label for="date" class="form-label">
+                    <i class="fas fa-calendar text-primary me-2"></i>
+                    Date de la dette *
+                  </label>
+                  <input 
+                    type="date" 
+                    id="date"
+                    class="form-control"
+                    formControlName="date"
+                    [class.is-valid]="date?.valid && date?.touched"
+                    [class.is-invalid]="date?.invalid && date?.touched">
+                  
+                  <div class="invalid-feedback" *ngIf="date?.invalid && date?.touched">
+                    <div *ngIf="date?.errors?.['required']">
+                      La date est obligatoire
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Montant de la dette -->
+                <div class="col-md-6 mb-4">
+                  <label for="montantDette" class="form-label">
+                    <i class="fas fa-money-bill-wave text-success me-2"></i>
+                    Montant de la dette (CFA) *
+                  </label>
+                  <input 
+                    type="number" 
+                    id="montantDette"
+                    class="form-control"
+                    formControlName="montantDette"
+                    placeholder="Ex: 50000"
+                    min="1000"
+                    max="10000000"
+                    [class.is-valid]="montantDette?.valid && montantDette?.touched"
+                    [class.is-invalid]="montantDette?.invalid && montantDette?.touched">
+                  
+                  <div class="invalid-feedback" *ngIf="montantDette?.invalid && montantDette?.touched">
+                    <div *ngIf="montantDette?.errors?.['required']">
+                      Le montant est obligatoire
+                    </div>
+                    <div *ngIf="montantDette?.errors?.['min']">
+                      Le montant minimum est de 1 000 CFA
+                    </div>
+                    <div *ngIf="montantDette?.errors?.['max']">
+                      Le montant maximum est de 10 000 000 CFA
+                    </div>
+                    <div *ngIf="montantDette?.errors?.['pattern']">
+                      Veuillez saisir un montant valide (chiffres uniquement)
+                    </div>
+                  </div>
+                  
+                  <small class="form-text text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Montant entre 1 000 et 10 000 000 CFA
+                  </small>
+                </div>
+              </div>
+
+              <!-- Description (optionnelle) -->
+              <div class="mb-4">
+                <label for="description" class="form-label">
+                  <i class="fas fa-comment text-info me-2"></i>
+                  Description (optionnelle)
+                </label>
+                <textarea 
+                  id="description"
+                  class="form-control"
+                  formControlName="description"
+                  rows="3"
+                  placeholder="Description de la dette..."
+                  maxlength="500"
+                  [class.is-valid]="description?.valid && description?.touched"
+                  [class.is-invalid]="description?.invalid && description?.touched">
+                </textarea>
+                
+                <div class="invalid-feedback" *ngIf="description?.invalid && description?.touched">
+                  <div *ngIf="description?.errors?.['maxlength']">
+                    La description ne peut pas dépasser 500 caractères
+                  </div>
+                </div>
+                
+                <small class="form-text text-muted">
+                  {{ description?.value?.length || 0 }}/500 caractères
+                </small>
+              </div>
+
+              <!-- Aperçu de la dette -->
+              <div class="preview-card p-4 mb-4" *ngIf="detteForm.valid">
+                <h5 class="text-primary mb-3">
+                  <i class="fas fa-eye me-2"></i>
+                  Aperçu de la dette
+                </h5>
+                <div class="row">
+                  <div class="col-md-3">
+                    <strong>Date:</strong><br>
+                    <span class="text-primary">{{ date?.value | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  <div class="col-md-3">
+                    <strong>Montant:</strong><br>
+                    <span class="text-success">{{ formatCurrency(montantDette?.value) }}</span>
+                  </div>
+                  <div class="col-md-3">
+                    <strong>Statut initial:</strong><br>
+                    <span class="badge bg-warning">Non payée</span>
+                  </div>
+                  <div class="col-md-3">
+                    <strong>Reste à payer:</strong><br>
+                    <span class="text-danger">{{ formatCurrency(montantDette?.value) }}</span>
+                  </div>
+                </div>
+                
+                <div class="mt-3" *ngIf="description?.value">
+                  <strong>Description:</strong><br>
+                  <em class="text-muted">{{ description?.value }}</em>
+                </div>
+              </div>
+
+              <!-- Boutons d'action -->
+              <div class="d-flex gap-3 justify-content-end btn-group-mobile">
+                <button 
+                  type="button" 
+                  class="btn btn-secondary btn-custom" 
+                  (click)="annuler()"
+                  [disabled]="loading">
+                  <i class="fas fa-times me-2"></i>
+                  Annuler
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-success btn-custom"
+                  [disabled]="detteForm.invalid || loading"
+                  [class.loading-overlay]="loading">
+                  <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!loading" class="fas fa-save me-2"></i>
+                  {{ loading ? 'Enregistrement...' : 'Enregistrer la dette' }}
+                </button>
+              </div>
+            </form>
+
+            <!-- Message de succès final -->
+            <div *ngIf="success" class="text-center py-4">
+              <div class="success-animation">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h4 class="text-success">Dette créée avec succès!</h4>
+                <p class="text-muted">Redirection vers la liste des dettes...</p>
+                <div class="spinner-border text-success mt-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer avec informations -->
+          <div class="card-footer bg-light text-center">
+            <small class="text-muted">
+              <i class="fas fa-info-circle me-1"></i>
+              Les champs marqués d'un astérisque (*) sont obligatoires
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

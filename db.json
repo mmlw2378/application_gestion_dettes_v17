@@ -1,0 +1,120 @@
+{
+  "clients": [
+    {
+      "id": 1,
+      "nom": "Amadou Diallo",
+      "telephone": "77123456",
+      "adresse": "Dakar, Médina"
+    },
+    {
+      "id": 2,
+      "nom": "Fatou Sall",
+      "telephone": "76987654",
+      "adresse": "Thiès, Escale"
+    },
+    {
+      "id": 3,
+      "nom": "Moussa Kane",
+      "telephone": "78555333",
+      "adresse": "Saint-Louis, Sor"
+    },
+    {
+      "id": 4,
+      "nom": "Aïcha Ndiaye",
+      "telephone": "77888999",
+      "adresse": "Kaolack, Centre"
+    },
+    {
+      "id": 5,
+      "nom": "Ibrahima Sarr",
+      "telephone": "76444555",
+      "adresse": "Ziguinchor, Plateau"
+    }
+  ],
+  "dettes": [
+    {
+      "id": 1,
+      "date": "2024-01-15",
+      "montantDette": 50000,
+      "montantPaye": 20000,
+      "montantRestant": 30000,
+      "clientId": 1
+    },
+    {
+      "id": 2,
+      "date": "2024-02-10",
+      "montantDette": 75000,
+      "montantPaye": 0,
+      "montantRestant": 75000,
+      "clientId": 1
+    },
+    {
+      "id": 3,
+      "date": "2024-01-20",
+      "montantDette": 30000,
+      "montantPaye": 30000,
+      "montantRestant": 0,
+      "clientId": 2
+    },
+    {
+      "id": 4,
+      "date": "2024-03-05",
+      "montantDette": 45000,
+      "montantPaye": 15000,
+      "montantRestant": 30000,
+      "clientId": 3
+    },
+    {
+      "id": 5,
+      "date": "2024-02-28",
+      "montantDette": 60000,
+      "montantPaye": 60000,
+      "montantRestant": 0,
+      "clientId": 4
+    }
+  ],
+  "paiements": [
+    {
+      "id": 1,
+      "montant": 15000,
+      "date": "2024-01-20",
+      "detteId": 1
+    },
+    {
+      "id": 2,
+      "montant": 5000,
+      "date": "2024-01-25",
+      "detteId": 1
+    },
+    {
+      "id": 3,
+      "montant": 30000,
+      "date": "2024-01-25",
+      "detteId": 3
+    },
+    {
+      "id": 4,
+      "montant": 10000,
+      "date": "2024-03-10",
+      "detteId": 4
+    },
+    {
+      "id": 5,
+      "montant": 5000,
+      "date": "2024-03-15",
+      "detteId": 4
+    },
+    {
+      "id": 6,
+      "montant": 30000,
+      "date": "2024-03-01",
+      "detteId": 5
+    },
+    {
+      "id": 7,
+      "montant": 30000,
+      "date": "2024-03-15",
+      "detteId": 5
+    }
+  ]
+}

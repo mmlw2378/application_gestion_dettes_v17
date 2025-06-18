@@ -1,0 +1,65 @@
+/* Styles globaux pour l'application */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.bg-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: all 0.3s;
+  border-radius: 6px;
+  margin: 0 5px;
+}
+
+.nav-link:hover {
+  transform: translateY(-2px);
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.1);
+}
+
+.nav-link.active {
+  background: rgba(255,255,255,0.2);
+  color: #ffffff !important;
+}
+
+footer {
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+/* Animation pour le router-outlet */
+main {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+  
+  .navbar-collapse {
+    margin-top: 1rem;
+  }
+}
